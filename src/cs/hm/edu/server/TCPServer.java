@@ -80,7 +80,7 @@ public class TCPServer implements Measureable<Socket> {
 
 
 		double seconds = (lastArrived.get() - firstArrived.get()) / (double) (1000 * 1000 * 1000);
-		double dataRate = counter.get() / seconds;
+		double dataRate = (counter.get() * BUFFER_SIZE) / seconds;
 
 		System.out.println(counter.get() + "Pakete in " + seconds + " Sekunden mit einer Datenrate von " + dataRate + " B/s");
 	}

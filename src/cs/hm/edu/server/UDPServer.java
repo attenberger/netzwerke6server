@@ -10,7 +10,7 @@ import java.util.concurrent.atomic.AtomicLong;
 
 public class UDPServer implements Measureable<DatagramPacket> {
 
-	private static final ExecutorService executor = Executors.newFixedThreadPool(4);
+	private static final ExecutorService executor = Executors.newFixedThreadPool(1);
 
 	private static final int BUFFER_SIZE = 1400;
 
@@ -35,6 +35,8 @@ public class UDPServer implements Measureable<DatagramPacket> {
 					// Set timeout for future received packets.
 					serverSocket.setSoTimeout(timeout);
 
+					// Increment counter.
+					counter.incrementAndGet();
 					firstPacket = false;
 				}
 
@@ -48,7 +50,7 @@ public class UDPServer implements Measureable<DatagramPacket> {
 
 		executor.shutdown();
 		double seconds = (lastArrived.get() - firstArrived.get()) / (double) (1000 * 1000 * 1000);
-		double dataRate = counter.get() / seconds;
+		double dataRate = (counter.get() * BUFFER_SIZE) / seconds;
 
 		System.out.println(counter.get() + "Pakete in " + seconds + " Sekunden mit einer Datenrate von " + dataRate + " B/s");
 	}
