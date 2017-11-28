@@ -45,7 +45,7 @@ public class UDPServer implements Measureable<DatagramPacket> {
 				});
 			}
 		} catch (IOException e) {
-			e.printStackTrace();
+			//e.printStackTrace();
 		}
 
 		executor.shutdown();

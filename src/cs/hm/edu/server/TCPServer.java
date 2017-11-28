@@ -47,12 +47,7 @@ public class TCPServer implements Measureable<Socket> {
 
 	@Override
 	public void measure(Socket socket) {
-		// Set timeout on socket.
-		try {
-			socket.setSoTimeout(timeout);
-		} catch (SocketException e) {
-			e.printStackTrace();
-		}
+		boolean setTimeout = true;
 
 		try (BufferedInputStream in = new BufferedInputStream(socket.getInputStream(), BUFFER_SIZE)) {
 			byte[] buffer = new byte[BUFFER_SIZE];
@@ -72,10 +67,18 @@ public class TCPServer implements Measureable<Socket> {
 				ByteBuffer b = ByteBuffer.wrap(buffer);
 				short sequenceNum = b.getShort(0);
 
-				//System.out.println("Received TCP Packet with number " + sequenceNum);
+				if (setTimeout) {
+					// Set timeout on socket.
+					try {
+						socket.setSoTimeout(timeout);
+					} catch (SocketException e) {
+						e.printStackTrace();
+					}
+					setTimeout = false;
+				}
 			}
 		} catch (IOException e) {
-			e.printStackTrace();
+			// e.printStackTrace();
 		}
 
 
