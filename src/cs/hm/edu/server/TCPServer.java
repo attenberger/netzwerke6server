@@ -15,7 +15,7 @@ public class TCPServer implements Measureable<Socket> {
 
 	private static final int BUFFER_SIZE = 1400;
 
-	private final ExecutorService executor = Executors.newFixedThreadPool(1);
+	private final ExecutorService executor = Executors.newSingleThreadExecutor();
 
 	private final int timeout;
 
@@ -38,8 +38,8 @@ public class TCPServer implements Measureable<Socket> {
 			executor.execute(() -> {
 				measure(client);
 			});
-			
-			
+
+
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -54,8 +54,10 @@ public class TCPServer implements Measureable<Socket> {
 		try (InputStream in = socket.getInputStream()) {
 			byte[] buffer = new byte[BUFFER_SIZE];
 			while (true) {
-				for(int i=0; i<BUFFER_SIZE; i++)
-					buffer[i] = (byte)in.read();
+				for (int i = 0; i < BUFFER_SIZE; i++) {
+					buffer[i] = (byte) in.read();
+				}
+
 				synchronized (firstPacket) {
 					if (firstPacket.get()) {
 						firstPacket.set(false);
@@ -85,7 +87,15 @@ public class TCPServer implements Measureable<Socket> {
 				}
 			}
 		} catch (IOException e) {
-			System.out.println(e.getMessage());
+			System.out.println("Verbindung zum Client unterbrochen.");
+
+			if (!socket.isClosed()) {
+				try {
+					socket.close();
+				} catch (IOException e1) {
+					e1.printStackTrace();
+				}
+			}
 		}
 
 

@@ -10,7 +10,7 @@ import java.util.concurrent.atomic.AtomicLong;
 
 public class UDPServer {
 
-	private static final ExecutorService executor = Executors.newFixedThreadPool(1);
+	private static final ExecutorService executor = Executors.newSingleThreadExecutor();
 
 	private static final int BUFFER_SIZE = 1400;
 
@@ -48,14 +48,12 @@ public class UDPServer {
 					counter.incrementAndGet();
 
 					//ByteBuffer buffer = ByteBuffer.wrap(received.getData());
-
 					//short sequenceNum = buffer.getShort(0);
-
 					//System.out.println("Received UDP Packet with number " + sequenceNum);
 				}
 			}
 		} catch (IOException e) {
-			System.out.println(e.getMessage());
+			System.out.println("Verbindung zum Client unterbrochen.");
 		}
 
 		executor.shutdown();
