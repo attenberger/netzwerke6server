@@ -1,11 +1,11 @@
 package cs.hm.edu.server;
 
-import java.io.BufferedInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.SocketException;
-import java.nio.ByteBuffer;
+//import java.nio.ByteBuffer;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -15,7 +15,7 @@ public class TCPServer implements Measureable<Socket> {
 
 	private static final int BUFFER_SIZE = 1400;
 
-	private final ExecutorService executor = Executors.newFixedThreadPool(4);
+	private final ExecutorService executor = Executors.newFixedThreadPool(1);
 
 	private final int timeout;
 
@@ -38,6 +38,8 @@ public class TCPServer implements Measureable<Socket> {
 			executor.execute(() -> {
 				measure(client);
 			});
+			
+			
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -49,9 +51,11 @@ public class TCPServer implements Measureable<Socket> {
 	public void measure(Socket socket) {
 		boolean setTimeout = true;
 
-		try (BufferedInputStream in = new BufferedInputStream(socket.getInputStream(), BUFFER_SIZE)) {
+		try (InputStream in = socket.getInputStream()) {
 			byte[] buffer = new byte[BUFFER_SIZE];
-			while (in.read(buffer) != -1) {
+			while (true) {
+				for(int i=0; i<BUFFER_SIZE; i++)
+					buffer[i] = (byte)in.read();
 				synchronized (firstPacket) {
 					if (firstPacket.get()) {
 						firstPacket.set(false);
@@ -64,8 +68,11 @@ public class TCPServer implements Measureable<Socket> {
 				// Increment counter.
 				counter.incrementAndGet();
 
-				ByteBuffer b = ByteBuffer.wrap(buffer);
-				short sequenceNum = b.getShort(0);
+//				ByteBuffer b = ByteBuffer.wrap(buffer);
+//				short sequenceNum = b.getShort(0);
+//				System.out.println(sequenceNum);
+//				if (sequenceNum == 0)
+//					System.out.println(Arrays.toString(buffer));
 
 				if (setTimeout) {
 					// Set timeout on socket.
@@ -78,7 +85,7 @@ public class TCPServer implements Measureable<Socket> {
 				}
 			}
 		} catch (IOException e) {
-			// e.printStackTrace();
+			System.out.println(e.getMessage());
 		}
 
 

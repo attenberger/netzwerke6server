@@ -3,12 +3,12 @@ package cs.hm.edu.server;
 import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
-import java.nio.ByteBuffer;
+//import java.nio.ByteBuffer;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicLong;
 
-public class UDPServer implements Measureable<DatagramPacket> {
+public class UDPServer {
 
 	private static final ExecutorService executor = Executors.newFixedThreadPool(1);
 
@@ -39,13 +39,23 @@ public class UDPServer implements Measureable<DatagramPacket> {
 					counter.incrementAndGet();
 					firstPacket = false;
 				}
+				while(true) {
+					serverSocket.receive(received);
+					// Update current timer.
+					lastArrived.set(System.nanoTime());
 
-				executor.execute(() -> {
-					measure(received);
-				});
+					// Increment counter.
+					counter.incrementAndGet();
+
+					//ByteBuffer buffer = ByteBuffer.wrap(received.getData());
+
+					//short sequenceNum = buffer.getShort(0);
+
+					//System.out.println("Received UDP Packet with number " + sequenceNum);
+				}
 			}
 		} catch (IOException e) {
-			//e.printStackTrace();
+			System.out.println(e.getMessage());
 		}
 
 		executor.shutdown();
@@ -53,21 +63,6 @@ public class UDPServer implements Measureable<DatagramPacket> {
 		double dataRate = (counter.get() * BUFFER_SIZE) / seconds;
 
 		System.out.println(counter.get() + "Pakete in " + seconds + " Sekunden mit einer Datenrate von " + dataRate + " B/s");
-	}
-
-	@Override
-	public void measure(DatagramPacket received) {
-		// Update current timer.
-		lastArrived.set(System.nanoTime());
-
-		// Increment counter.
-		counter.incrementAndGet();
-
-		ByteBuffer buffer = ByteBuffer.wrap(received.getData());
-
-		short sequenceNum = buffer.getShort(0);
-
-		//System.out.println("Received UDP Packet with number " + sequenceNum);
 	}
 
 }

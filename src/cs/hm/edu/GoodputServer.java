@@ -8,7 +8,7 @@ import java.io.IOException;
 public class GoodputServer {
 
 	private static final int PORT = 63423;
-	private static final int TIMEOUT = 5000;
+	private static final int TIMEOUT = 2000;
 
 	public static void main(String... args) throws IOException {
 		boolean isTcp = Boolean.parseBoolean(args[0]);
